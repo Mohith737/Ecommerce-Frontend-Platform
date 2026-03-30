@@ -42,7 +42,7 @@ export async function registerAndInjectToken(page: Page): Promise<string> {
 export async function signInViaUI(
   page: Page,
   email: string,
-  password = TEST_PASSWORD
+  password=see .env file
 ): Promise<void> {
   const openSignIn = async () => {
     await page.goto('/#/sign-in', { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -67,3 +67,5 @@ export async function signInViaUI(
   await page.getByTestId('sign-in-submit').click();
   await page.waitForURL(url => !url.hash.includes('sign-in'), { timeout: 15000 });
 }
+
+

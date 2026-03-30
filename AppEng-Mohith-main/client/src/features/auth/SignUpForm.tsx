@@ -107,7 +107,7 @@ export function SignUpForm() {
       fullName.trim().length >= 2 &&
       isValidEmail(email) &&
       password.length >= 8 &&
-      confirmPassword === password &&
+      confirmPassword=see .env file
       !emailError &&
       !passwordError &&
       !confirmError
@@ -395,3 +395,5 @@ export function SignUpForm() {
     </div>
   );
 }
+
+
