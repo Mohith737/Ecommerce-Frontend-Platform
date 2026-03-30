@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "prepare": "husky install .husky",
+    "postinstall": "pnpm -C client install"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

@@ -1,0 +1,24 @@
+/* Z-Index Scale - defined directly in @theme as source of truth */
+@theme {
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+}
+
+:root {
+  --z-auto: auto;
+
+  /* Component-specific Z-Index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-notification: 1080;
+  --z-toast: 1090;
+}

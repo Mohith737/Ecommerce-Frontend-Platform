@@ -1,0 +1,12 @@
+export { HomePage } from './HomePage';
+export { SignInPage } from './SignInPage';
+export { SignUpPage } from './SignUpPage';
+export { PLPPage } from './PLPPage';
+export { PDPPage } from './PDPPage';
+export { CheckoutPage } from './CheckoutPage';
+export { OrderSuccessPage } from './OrderSuccessPage';
+export { NotFoundPage } from './NotFoundPage';
+export { ProfilePage } from './ProfilePage';
+export { default as Category } from './Category';
+export { default as Compare } from './Compare';
+export { default as Cart } from './Cart';

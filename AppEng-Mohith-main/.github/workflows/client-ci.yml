@@ -1,0 +1,40 @@
+name: client-ci
+true:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  client:
+    runs-on:
+    - self-hosted
+    - gcp-ci
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: client
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: '9'
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: pnpm
+        cache-dependency-path: client/pnpm-lock.yaml
+    - name: Install deps
+      run: pnpm install --frozen-lockfile
+    - name: Prettier check
+      run: pnpm run format:check
+    - name: Lint
+      run: pnpm run lint
+    - name: Build
+      run: pnpm run build
+'on':
+  push:
+    branches:
+    - Assignment-2

@@ -1,0 +1,2209 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ecom Backend",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register a new user",
+        "description": "Create a new account with email, password, and full name. Returns a JWT access token on success. Returns 400 if the email is already registered.",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login and get a JWT token",
+        "description": "Authenticate with email and password. Returns a JWT access token valid for 30 minutes. Send this token in the Authorization header as 'Bearer \u003Ctoken\u003E' for all protected endpoints. Returns 401 if credentials are invalid.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get current user profile",
+        "description": "Returns the profile of the currently authenticated user including saved address. Requires a valid Bearer token. Returns 401 if the token is missing or invalid.",
+        "operationId": "getUserProfile",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Update current user profile",
+        "description": "Updates the authenticated user's profile fields (name, phone, address). Only provided fields are updated. Requires a valid Bearer token.",
+        "operationId": "updateUserProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/products/": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "List products with optional filtering and pagination",
+        "description": "Returns a paginated list of products with total count. Filter by subcategory_id, category_id, price range, or minimum rating. No authentication required.",
+        "operationId": "listProducts",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of products to skip for pagination.",
+              "default": 0,
+              "title": "Skip"
+            },
+            "description": "Number of products to skip for pagination."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Maximum number of products to return.",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Maximum number of products to return."
+          },
+          {
+            "name": "subcategory_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by subcategory ID.",
+              "title": "Subcategory Id"
+            },
+            "description": "Filter by subcategory ID."
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by category ID (returns products from all subcategories of this category).",
+              "title": "Category Id"
+            },
+            "description": "Filter by category ID (returns products from all subcategories of this category)."
+          },
+          {
+            "name": "price_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum price filter.",
+              "title": "Price Min"
+            },
+            "description": "Minimum price filter."
+          },
+          {
+            "name": "price_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum price filter.",
+              "title": "Price Max"
+            },
+            "description": "Maximum price filter."
+          },
+          {
+            "name": "rating_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 5,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum rating filter (0–5).",
+              "title": "Rating Min"
+            },
+            "description": "Minimum rating filter (0–5)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedProducts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/demo": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Get 10 demo products",
+        "description": "Returns 10 products picked across different categories. No pagination, no filters. Useful for landing pages or quick previews. No authentication required.",
+        "operationId": "getDemoProducts",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProductOut"
+                  },
+                  "type": "array",
+                  "title": "Response Getdemoproducts"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/search": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Search products by name or description",
+        "description": "Searches products where the name or description contains the query string (case-insensitive). Supports price range filtering. No authentication required.",
+        "operationId": "searchProducts",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search term. Matches against product name and description.",
+              "title": "Q"
+            },
+            "description": "Search term. Matches against product name and description."
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of products to skip for pagination.",
+              "default": 0,
+              "title": "Skip"
+            },
+            "description": "Number of products to skip for pagination."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Maximum number of products to return.",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Maximum number of products to return."
+          },
+          {
+            "name": "subcategory_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional. Narrow search to a specific subcategory.",
+              "title": "Subcategory Id"
+            },
+            "description": "Optional. Narrow search to a specific subcategory."
+          },
+          {
+            "name": "price_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum price filter.",
+              "title": "Price Min"
+            },
+            "description": "Minimum price filter."
+          },
+          {
+            "name": "price_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum price filter.",
+              "title": "Price Max"
+            },
+            "description": "Maximum price filter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedProducts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product_id}": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Get a single product by ID",
+        "description": "Returns full details of a single product including its category, subcategory, price, rating, stock, and image URL. No authentication required. Returns 404 if the product does not exist.",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Get the current user's cart",
+        "description": "Returns all items in the authenticated user's shopping cart. Each item includes full product details. Requires a valid Bearer token.",
+        "operationId": "getCart",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CartItemOut"
+                  },
+                  "type": "array",
+                  "title": "Response Getcart"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Add a product to cart",
+        "description": "Adds a product to the authenticated user's cart. If the product is already in the cart, the quantity is increased by the given amount. Requires a valid Bearer token. Returns 404 if the product does not exist.",
+        "operationId": "addToCart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItemAdd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/cart/{item_id}": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Remove an item from cart",
+        "description": "Removes a cart item by its cart item ID (not the product ID). The item must belong to the authenticated user. Requires a valid Bearer token. Returns 404 if the cart item is not found.",
+        "operationId": "removeFromCart",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "List all orders for the current user",
+        "description": "Returns all orders placed by the authenticated user, newest first, including items, shipping details, and status.",
+        "operationId": "listOrders",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrderOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listorders"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Create an order",
+        "description": "Creates a new order for the authenticated user. If **items** is provided in the request body, the order is built directly from those items (direct order flow). If **items** is omitted, all products in the user's cart are used and the cart is cleared after the order is placed (checkout flow). Returns 400 if no items are provided and the cart is empty. Returns 404 if any specified product_id does not exist.",
+        "operationId": "createOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/orders/user/{user_id}": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "List all orders for a given user",
+        "description": "Returns all orders placed by the specified user, newest first. Requires authentication.",
+        "operationId": "listOrdersByUser",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderOut"
+                  },
+                  "title": "Response Listordersbyuser"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{order_id}": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Get a single order",
+        "description": "Returns the full details of a specific order belonging to the authenticated user. Returns 404 if the order does not exist or belongs to another user.",
+        "operationId": "getOrder",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "List all categories",
+        "description": "Returns all product categories with their image. No authentication required.",
+        "operationId": "listCategories",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryOut"
+                  },
+                  "type": "array",
+                  "title": "Response Listcategories"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{category_id}": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "Get a category with its subcategories",
+        "description": "Returns a single category along with all its subcategories. No authentication required. Returns 404 if the category does not exist.",
+        "operationId": "getCategory",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryWithSubCategories"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{category_id}/products": {
+      "get": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "Get all products for a category",
+        "description": "Returns a paginated list of all products belonging to the given category (via its subcategories). Returns 404 if the category does not exist. No authentication required.",
+        "operationId": "getCategoryProducts",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Category Id"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of products to skip for pagination.",
+              "default": 0,
+              "title": "Skip"
+            },
+            "description": "Number of products to skip for pagination."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Maximum number of products to return.",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Maximum number of products to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedProducts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subcategories/": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "List subcategories with optional category filter",
+        "description": "Returns subcategories. Optionally filter by category_id to get subcategories of a specific category. No authentication required.",
+        "operationId": "listSubCategories",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by parent category ID.",
+              "title": "Category Id"
+            },
+            "description": "Filter by parent category ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubCategoryOut"
+                  },
+                  "title": "Response Listsubcategories"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subcategories/{subcategory_id}": {
+      "get": {
+        "tags": [
+          "subcategories"
+        ],
+        "summary": "Get a subcategory with all its products",
+        "description": "Returns a single subcategory along with all products that belong to it. No authentication required. Returns 404 if the subcategory does not exist.",
+        "operationId": "getSubCategory",
+        "parameters": [
+          {
+            "name": "subcategory_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Subcategory Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubCategoryWithProducts"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wishlist/": {
+      "get": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "Get the current user's wishlist",
+        "description": "Returns all products in the authenticated user's wishlist. Each item includes full product details. Requires a valid Bearer token.",
+        "operationId": "getWishlist",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WishlistItemOut"
+                  },
+                  "type": "array",
+                  "title": "Response Getwishlist"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "Add a product to wishlist",
+        "description": "Adds a product to the authenticated user's wishlist. If the product is already in the wishlist, returns 400. Requires a valid Bearer token. Returns 404 if the product does not exist.",
+        "operationId": "addToWishlist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WishlistItemAdd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistItemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/wishlist/{product_id}": {
+      "delete": {
+        "tags": [
+          "wishlist"
+        ],
+        "summary": "Remove a product from wishlist",
+        "description": "Removes a product from the authenticated user's wishlist by product ID. Requires a valid Bearer token. Returns 404 if the product is not in the wishlist.",
+        "operationId": "removeFromWishlist",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product_id}/reviews": {
+      "get": {
+        "tags": [
+          "reviews"
+        ],
+        "summary": "Get reviews for a product",
+        "description": "Returns all reviews for the given product ordered by newest first, each including the reviewer's user_id and name. No authentication required. Returns 404 if the product does not exist.",
+        "operationId": "getProductReviews",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewOut"
+                  },
+                  "title": "Response Getproductreviews"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reviews"
+        ],
+        "summary": "Add a review for a product",
+        "description": "Adds a review for the given product mapped to the authenticated user. Response includes user_id and reviewer name. Authentication required. Returns 404 if the product does not exist.",
+        "operationId": "addProductReview",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}/reviews": {
+      "get": {
+        "tags": [
+          "reviews"
+        ],
+        "summary": "Get all reviews written by a user",
+        "description": "Returns all reviews submitted by the given user, newest first, each including the product_id and product name. No authentication required. Returns 404 if the user does not exist.",
+        "operationId": "getUserReviews",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewOut"
+                  },
+                  "title": "Response Getuserreviews"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CartItemAdd": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "CartItemAdd"
+      },
+      "CartItemOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "quantity",
+          "product"
+        ],
+        "title": "CartItemOut"
+      },
+      "CategoryOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "title": "CategoryOut"
+      },
+      "CategoryWithSubCategories": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": ""
+          },
+          "subcategories": {
+            "items": {
+              "$ref": "#/components/schemas/SubCategoryOut"
+            },
+            "type": "array",
+            "title": "Subcategories",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "title": "CategoryWithSubCategories"
+      },
+      "CreateOrderRequest": {
+        "properties": {
+          "shipping_name": {
+            "type": "string",
+            "title": "Shipping Name"
+          },
+          "shipping_email": {
+            "type": "string",
+            "title": "Shipping Email"
+          },
+          "shipping_phone": {
+            "type": "string",
+            "title": "Shipping Phone"
+          },
+          "shipping_address": {
+            "type": "string",
+            "title": "Shipping Address"
+          },
+          "shipping_city": {
+            "type": "string",
+            "title": "Shipping City"
+          },
+          "shipping_state": {
+            "type": "string",
+            "title": "Shipping State"
+          },
+          "shipping_zip": {
+            "type": "string",
+            "title": "Shipping Zip"
+          },
+          "shipping_country": {
+            "type": "string",
+            "title": "Shipping Country",
+            "default": "United States"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total",
+            "description": "Frontend-calculated order total (used for cart/checkout flow). If omitted, total is derived from item unit_prices."
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OrderItemIn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "Explicit list of items to order. If omitted, the user's cart is used (checkout flow) and cleared after the order is placed."
+          }
+        },
+        "type": "object",
+        "required": [
+          "shipping_name",
+          "shipping_email",
+          "shipping_phone",
+          "shipping_address",
+          "shipping_city",
+          "shipping_state",
+          "shipping_zip"
+        ],
+        "title": "CreateOrderRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "OrderItemIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "title": "Quantity",
+            "description": "Quantity of the product.",
+            "default": 1
+          },
+          "unit_price": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "title": "Unit Price",
+            "description": "Final unit price after all frontend calculations (tax, discount, etc.)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "unit_price"
+        ],
+        "title": "OrderItemIn"
+      },
+      "OrderItemOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name",
+            "default": ""
+          },
+          "product_image": {
+            "type": "string",
+            "title": "Product Image",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "quantity",
+          "price"
+        ],
+        "title": "OrderItemOut"
+      },
+      "OrderOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "total": {
+            "type": "number",
+            "title": "Total"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "shipping_name": {
+            "type": "string",
+            "title": "Shipping Name",
+            "default": ""
+          },
+          "shipping_email": {
+            "type": "string",
+            "title": "Shipping Email",
+            "default": ""
+          },
+          "shipping_phone": {
+            "type": "string",
+            "title": "Shipping Phone",
+            "default": ""
+          },
+          "shipping_address": {
+            "type": "string",
+            "title": "Shipping Address",
+            "default": ""
+          },
+          "shipping_city": {
+            "type": "string",
+            "title": "Shipping City",
+            "default": ""
+          },
+          "shipping_state": {
+            "type": "string",
+            "title": "Shipping State",
+            "default": ""
+          },
+          "shipping_zip": {
+            "type": "string",
+            "title": "Shipping Zip",
+            "default": ""
+          },
+          "shipping_country": {
+            "type": "string",
+            "title": "Shipping Country",
+            "default": ""
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "total",
+          "status",
+          "created_at",
+          "items"
+        ],
+        "title": "OrderOut"
+      },
+      "PaginatedProducts": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProductOut"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of products for the current page."
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of products matching the query."
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "description": "Number of products skipped."
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Page size used for this response."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "skip",
+          "limit"
+        ],
+        "title": "PaginatedProducts"
+      },
+      "ProductOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "original_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original Price"
+          },
+          "rating": {
+            "type": "number",
+            "title": "Rating",
+            "default": 0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "default": ""
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": ""
+          },
+          "stock": {
+            "type": "integer",
+            "title": "Stock"
+          },
+          "subcategory_id": {
+            "type": "integer",
+            "title": "Subcategory Id"
+          },
+          "subcategory_name": {
+            "type": "string",
+            "title": "Subcategory Name",
+            "default": ""
+          },
+          "category_name": {
+            "type": "string",
+            "title": "Category Name",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "price",
+          "stock",
+          "subcategory_id"
+        ],
+        "title": "ProductOut"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "full_name"
+        ],
+        "title": "RegisterRequest"
+      },
+      "ReviewCreate": {
+        "properties": {
+          "rating": {
+            "type": "number",
+            "maximum": 5,
+            "minimum": 1,
+            "title": "Rating",
+            "description": "Rating between 1 and 5."
+          },
+          "review_text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Review Text",
+            "description": "Review body text."
+          }
+        },
+        "type": "object",
+        "required": [
+          "rating",
+          "review_text"
+        ],
+        "title": "ReviewCreate"
+      },
+      "ReviewOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name",
+            "default": ""
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "reviewer_name": {
+            "type": "string",
+            "title": "Reviewer Name",
+            "default": ""
+          },
+          "rating": {
+            "type": "number",
+            "title": "Rating"
+          },
+          "review_text": {
+            "type": "string",
+            "title": "Review Text"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "user_id",
+          "rating",
+          "review_text",
+          "created_at"
+        ],
+        "title": "ReviewOut"
+      },
+      "SubCategoryOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": ""
+          },
+          "category_id": {
+            "type": "integer",
+            "title": "Category Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category_id"
+        ],
+        "title": "SubCategoryOut"
+      },
+      "SubCategoryWithProducts": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "default": ""
+          },
+          "category_id": {
+            "type": "integer",
+            "title": "Category Id"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/ProductOut"
+            },
+            "type": "array",
+            "title": "Products",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category_id"
+        ],
+        "title": "SubCategoryWithProducts"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "phone": {
+            "type": "string",
+            "title": "Phone",
+            "default": ""
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "default": ""
+          },
+          "city": {
+            "type": "string",
+            "title": "City",
+            "default": ""
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": ""
+          },
+          "zip_code": {
+            "type": "string",
+            "title": "Zip Code",
+            "default": ""
+          },
+          "country": {
+            "type": "string",
+            "title": "Country",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "is_active"
+        ],
+        "title": "UserOut"
+      },
+      "UserUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "zip_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zip Code"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WishlistItemAdd": {
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "title": "WishlistItemAdd"
+      },
+      "WishlistItemOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "product"
+        ],
+        "title": "WishlistItemOut"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

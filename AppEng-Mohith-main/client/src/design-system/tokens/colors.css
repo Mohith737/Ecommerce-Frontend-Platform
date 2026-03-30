@@ -1,0 +1,41 @@
+:root {
+  /* Brand */
+  --color-primary: #6c4ff0;
+  --color-primary-hover: #5a3fd4;
+  --color-primary-light: #ede9fd;
+  --color-primary-50: #f5f3ff;
+
+  /* Semantic */
+  --color-success: #22c55e;
+  --color-success-bg: #f0fdf4;
+  --color-success-dark: #16a34a;
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Neutrals */
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Surface */
+  --color-surface: var(--color-white);
+  --color-surface-raised: var(--color-gray-50);
+  --color-border: var(--color-gray-200);
+  --color-border-focus: var(--color-primary);
+
+  /* Text */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-muted: var(--color-gray-400);
+  --color-text-inverse: var(--color-white);
+}
